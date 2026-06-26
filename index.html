@@ -1,0 +1,66 @@
+
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>호왕연 목패 발급소</title>
+<style>
+body{margin:0;background:#0d0b09;font-family:"Apple SD Gothic Neo",sans-serif;color:#e7d0a1;display:flex;justify-content:center}
+.panel{width:390px;min-height:100vh;padding:28px 22px;box-sizing:border-box;
+background:
+radial-gradient(circle at top,#2b231a 0,#100d0a 45%,#0a0908 100%);
+border-left:1px solid #3a2d1d;border-right:1px solid #3a2d1d}
+h1{font-size:54px;line-height:1.05;text-align:center;margin:20px 0 6px;font-weight:700}
+.sub{text-align:center;color:#bca27a;font-size:14px;margin-bottom:28px}
+.box{border:1px solid #4c3a26;padding:18px;border-radius:2px}
+.box h2{text-align:center;margin:0 0 18px;font-size:32px;font-weight:500}
+label{display:block;margin:12px 0 6px;color:#c9ae7d}
+input{width:100%;box-sizing:border-box;padding:13px;background:#171412;border:1px solid #403223;border-radius:4px;color:#f5e8c8;font-size:15px}
+small{display:block;color:#8d7759;margin-top:6px}
+.opt{margin:18px 0;color:#c9ae7d}
+button{width:100%;margin-top:18px;padding:15px;background:linear-gradient(#9d7340,#76522b);border:none;border-radius:4px;color:#fff4de;font-size:22px}
+.notice{margin-top:22px;border-top:1px solid #3d3021;padding-top:14px;color:#a58d67;font-size:13px;line-height:1.6}
+</style></head><body>
+<div class="panel">
+<div style="text-align:center;font-size:30px;">虎王宴</div>
+<h1>목패 발급소</h1>
+<div class="sub">호왕의 어명에 따라<br>신분을 증명할 목패를 발급합니다.</div>
+
+<div class="box">
+<h2>정보 입력</h2>
+
+<label>이름</label>
+<input id="name" placeholder="이름을 입력하세요.">
+
+<label>종족</label>
+<input id="species" placeholder="종족을 입력하세요.">
+
+<label>신분(직업)</label>
+<input id="job" placeholder="신분을 입력하세요.">
+
+<label>재주</label>
+<input id="talent" placeholder="재주를 입력하세요.">
+
+<label>번호</label>
+<input id="num" placeholder="비워두면 자동 생성됩니다.">
+<small>비워두면 자동으로 생성됩니다.</small>
+
+<div class="opt">
+<input type="checkbox" id="gob" style="width:auto"> 도깨비 (운영진 전용)
+</div>
+
+<button onclick="issue()">목패 발급하기</button>
+
+<div class="notice">
+※ 발급된 목패는 자유롭게 사용 가능하나,<br>
+타인에게 양도 및 위조를 금합니다.
+</div>
+</div>
+</div>
+<script>
+function issue(){
+ if(!num.value.trim()){
+   num.value='虎-'+String(Math.floor(Math.random()*999)+1).padStart(3,'0');
+ }
+ alert('다음 단계에서 목패 이미지 생성 기능을 연결할 수 있습니다.');
+}
+</script>
+</body></html>
