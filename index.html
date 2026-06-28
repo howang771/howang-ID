@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호왕연 목패 발급소</title>
+    <style>
+        /* 기본 스타일 및 다크 테마 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Noto Sans KR', 'Noto Serif KR', sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 메인 컨테이너: PC 좌우 배치, 모바일 상하 배치 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1100px;
+            gap: 40px;
+            background: #161616;
+            border: 1px solid #2a221b;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        @media (min-width: 850px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+
+        /* 왼쪽: 정보 입력 영역 */
+        .input-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 320px;
+        }
+        .input-section h2 {
+            color: #c5a880;
+            border-bottom: 2px solid #4a3b2c;
+            padding-bottom: 12px;
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-size: 0.95rem;
+            color: #b5a494;
+            font-weight: 500;
+        }
+        .form-group input {
+            padding: 14px;
+            background: #222222;
+            border: 1px solid #443a30;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #c5a880;
+            background: #2a2a2a;
+            box-shadow: 0 0 8px rgba(197, 168, 128, 0.2);
+        }
+        .submit-btn {
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #c5a880 0%, #a3855c 100%);
+            color: #121212;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #d9be96 0%, #b8996e 100%);
+            transform: translateY(-2px);
+        }
+
+        /* 오른쪽: 목패 미리보기 영역 */
+        .preview-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 25px;
+        }
+        .preview-section h2 {
+            color: #c5a880;
+            align-self: flex-start;
+            font-size: 1.6rem;
+        }
+        .canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        .canvas-wrapper p {
+            font-size: 1rem;
+            color: #c5a880;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            background: #1a1a1a;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <div class="input-section">
+        <h2>정보 입력</h2>
+        <div class="form-group">
+            <label for="inputName">이름</label>
+            <input type="text" id="inputName" placeholder="이름을 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputRace">종족</label>
+            <input type="text" id="inputRace" placeholder="종족을 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputSkill">재주</label>
+            <input type="text" id="inputSkill" placeholder="재주를 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputNumber">번호</label>
+            <input type="text" id="inputNumber" placeholder="예: 虎-017 (미입력 시 자동 생성)">
+        </div>
+        <button class="submit-btn" id="saveBtn">목패 발급하기</button>
+    </div>
+
+    <div class="preview-section">
+        <h2>목패 미리보기</h2>
+        <div class="canvas-wrapper">
+            <p>✦ 목패 앞면 (앞面) ✦</p>
+            <canvas id="frontCanvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. 원본 이미지 경로 설정 ---
+    const FRONT_IMAGE_URL = 'front_bg.jpg'; 
+
+    // --- 2. DOM 및 Canvas 설정 ---
+    const frontCanvas = document.getElementById('frontCanvas');
+    const ctxFront = frontCanvas.getContext('2d');
+
+    const fields = {
+        name: document.getElementById('inputName'),
+        race: document.getElementById('inputRace'),
+        skill: document.getElementById('inputSkill'),
+        number: document.getElementById('inputNumber')
+    };
+    const saveBtn = document.getElementById('saveBtn');
+
+    const imgFront = new Image();
+    let imageLoaded = false;
+
+    imgFront.src = FRONT_IMAGE_URL;
+    imgFront.onload = () => {
+        imageLoaded = true;
+        // Canvas 크기를 불러온 원본 고해상도 이미지 크기와 1:1 매칭
+        frontCanvas.width = imgFront.width;
+        frontCanvas.height = imgFront.height;
+        render();
+    };
+
+    // --- 동양풍 세로쓰기 지원 함수 ---
+    function drawTextVertical(ctx, text, x, y, lineHeight) {
+        ctx.save();
+        for (let i = 0; i < text.length; i++) {
+            let char = text.charAt(i);
+            ctx.fillText(char, x, y + (i * lineHeight));
+        }
+        ctx.restore();
+    }
+
+    // --- 3. 실시간 렌더링 함수 (음각 각인 효과) ---
+    function render() {
+        if (!imageLoaded) return;
+
+        // 원본 이미지 그리기
+        ctxFront.clearRect(0, 0, frontCanvas.width, frontCanvas.height);
+        ctxFront.drawImage(imgFront, 0, 0);
+
+        ctxFront.save();
+        // 묵직하게 파인 나무 음각 전용 그림자 및 색상 튜닝
+        ctxFront.fillStyle = 'rgba(25, 12, 4, 0.88)'; 
+        ctxFront.shadowColor = '#000000';              // 그림자 색상 블랙
+        ctxFront.shadowBlur = 3;                       // 파임의 부드러운 깊이감
+        ctxFront.shadowOffsetX = -1.5;                  // 입체감을 살리는 오프셋 정밀 제어
+        ctxFront.shadowOffsetY = -1.5;
+        ctxFront.textAlign = 'center';
+        ctxFront.textBaseline = 'top';
+
+        // 1. 이름 (정중앙 세로쓰기 배치)
+        if (fields.name.value) {
+            ctxFront.font = 'bold 44px "Noto Serif KR", serif';
+            drawTextVertical(ctxFront, fields.name.value, frontCanvas.width / 2, frontCanvas.height * 0.32, 54);
+        }
+        
+        // 2. 하단 정보 영역 (종족, 재주, 번호 조화롭게 배치)
+        ctxFront.font = '600 24px "Noto Serif KR", serif';
+        ctxFront.shadowBlur = 1.5;
+        ctxFront.shadowOffsetX = -1;
+        ctxFront.shadowOffsetY = -1;
+        
+        let bottomY = frontCanvas.height * 0.70;
+        
+        if (fields.race.value) {
+            ctxFront.fillText(`종족: ${fields.race.value}`, frontCanvas.width / 2, bottomY);
+            bottomY += 35;
+        }
+        if (fields.skill.value) {
+            ctxFront.fillText(`재주: ${fields.skill.value}`, frontCanvas.width / 2, bottomY);
+            bottomY += 35;
+        }
+        
+        // 번호 정보도 앞면 디자인 하단에 자연스럽게 녹아들도록 추가
+        let numText = fields.number.value || "虎-017"; 
+        ctxFront.fillText(`식별: ${numText}`, frontCanvas.width / 2, bottomY);
+        
+        ctxFront.restore();
+    }
+
+    // --- 4. 이벤트 리스너 등록 (실시간 반영) ---
+    Object.values(fields).forEach(field => {
+        field.addEventListener('input', render);
+    });
+
+    // --- 5. 최종 이미지 단권 발급 (다운로드) 기능 ---
+    saveBtn.addEventListener('click', () => {
+        const fileNameBase = fields.name.value || '목패';
+        
+        const linkFront = document.createElement('a');
+        linkFront.download = `${fileNameBase}_목패.jpg`;
+        linkFront.href = frontCanvas.toDataURL('image/jpeg', 0.95);
+        linkFront.click();
+    });
+</script>
+
+</body>
+</html>
