@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호왕연 목패 발급소</title>
+    <style>
+        /* 기본 스타일 및 다크 테마 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Noto Sans KR', sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 메인 컨테이너: PC에서는 좌우 배치, 모바일에서는 상하 배치 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            gap: 30px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+
+        /* 왼쪽: 정보 입력 영역 */
+        .input-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .input-section h2 {
+            color: #d4af37;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .form-group input, .form-group select {
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        .submit-btn {
+            margin-top: 15px;
+            padding: 15px;
+            background: #d4af37;
+            color: #121212;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover {
+            background: #f1c40f;
+        }
+
+        /* 오른쪽: 목패 미리보기 (Canvas) 영역 */
+        .preview-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .preview-section h2 {
+            color: #d4af37;
+            align-self: flex-start;
+            font-size: 1.5rem;
+        }
+        .canvas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+        /* Canvas가 화면을 벗어나지 않도록 반응형 처리 */
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            background: #222; /* 이미지 로딩 전 기본 배경 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="input-section">
+        <h2>정보 입력</h2>
+        <div class="form-group">
+            <label for="inputName">이름</label>
+            <input type="text" id="inputName" placeholder="이름을 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputRace">종족</label>
+            <select id="inputRace">
+                <option value="">종족을 선택하세요.</option>
+                <option value="인간">인간</option>
+                <option value="호족">호족</option>
+                <option value="선인">선인</option>
+                <option value="도깨비">도깨비</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="inputJob">신분 (직업)</label>
+            <input type="text" id="inputJob" placeholder="신분을 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputSkill">재주</label>
+            <input type="text" id="inputSkill" placeholder="재주를 입력하세요.">
+        </div>
+        <div class="form-group">
+            <label for="inputNumber">번호</label>
+            <input type="text" id="inputNumber" placeholder="예: 虎-017 (미입력 시 자동 생성)">
+        </div>
+        <button class="submit-btn" id="saveBtn">목패 발급하기</button>
+    </div>
+
+    <div class="preview-section">
+        <h2>목패 미리보기</h2>
+        <div class="canvas-container">
+            <div>
+                <p style="text-align:center; margin-bottom:5px; color:#aaa;">✦ 앞면 ✦</p>
+                <canvas id="frontCanvas"></canvas>
+            </div>
+            <div>
+                <p style="text-align:center; margin-bottom:5px; color:#aaa;">✦ 뒷면 ✦</p>
+                <canvas id="backCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. 원본 이미지 경로 설정 ---
+    // 실제 사용하실 원본 목패 이미지 파일 경로를 입력해주세요.
+    const FRONT_IMAGE_URL = 'front_bg.jpg'; 
+    const BACK_IMAGE_URL = 'back_bg.jpg';   
+
+    // --- 2. DOM 및 Canvas 설정 ---
+    const frontCanvas = document.getElementById('frontCanvas');
+    const backCanvas = document.getElementById('backCanvas');
+    const ctxFront = frontCanvas.getContext('2d');
+    const ctxBack = backCanvas.getContext('2d');
+
+    // 입력 요소들
+    const fields = {
+        name: document.getElementById('inputName'),
+        race: document.getElementById('inputRace'),
+        job: document.getElementById('inputJob'),
+        skill: document.getElementById('inputSkill'),
+        number: document.getElementById('inputNumber')
+    };
+    const saveBtn = document.getElementById('saveBtn');
+
+    // 이미지 객체 생성
+    const imgFront = new Image();
+    const imgBack = new Image();
+
+    let imagesLoaded = 0;
+    function checkAllImagesLoaded() {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+            // 이미지 로드가 완료되면 Canvas 크기를 원본 이미지 크기로 지정
+            frontCanvas.width = imgFront.width;
+            frontCanvas.height = imgFront.height;
+            backCanvas.width = imgBack.width;
+            backCanvas.height = imgBack.height;
+            
+            // 초기 렌더링
+            render();
+        }
+    }
+
+    imgFront.src = FRONT_IMAGE_URL;
+    imgBack.src = BACK_IMAGE_URL;
+    imgFront.onload = checkAllImagesLoaded;
+    imgBack.onload = checkAllImagesLoaded;
+
+    // --- 3. 실시간 렌더링 함수 (Canvas 그리기) ---
+    function render() {
+        if (imagesLoaded < 2) return;
+
+        // [앞면 그리기]
+        ctxFront.clearRect(0, 0, frontCanvas.width, frontCanvas.height);
+        ctxFront.drawImage(imgFront, 0, 0); // 원본 배경 그리기
+
+        // 앞면 텍스트 스타일 설정 (세로쓰기 혹은 가로쓰기 포맷에 맞게 아래 좌표/폰트 수정 가능)
+        ctxFront.fillStyle = 'rgba(40, 20, 10, 0.9)'; // 나무에 새겨진 듯한 짙은 갈색 톤
+        ctxFront.textAlign = 'center';
+        
+        // 이름 출력 (예시 좌표: 중앙 부근)
+        if(fields.name.value) {
+            ctxFront.font = 'bold 45px "Noto Serif KR", serif'; // 한문/동양풍 서체 스타일 권장
+            ctxFront.fillText(fields.name.value, frontCanvas.width / 2, frontCanvas.height * 0.4);
+        }
+        
+        // 종족 및 신분 출력
+        ctxFront.font = '30px "Noto Sans KR"';
+        if(fields.race.value) {
+            ctxFront.fillText(`종족: ${fields.race.value}`, frontCanvas.width / 2, frontCanvas.height * 0.55);
+        }
+        if(fields.job.value) {
+            ctxFront.fillText(`신분: ${fields.job.value}`, frontCanvas.width / 2, frontCanvas.height * 0.65);
+        }
+        if(fields.skill.value) {
+            ctxFront.fillText(`재주: ${fields.skill.value}`, frontCanvas.width / 2, frontCanvas.height * 0.72);
+        }
+
+
+        // [뒷면 그리기]
+        ctxBack.clearRect(0, 0, backCanvas.width, backCanvas.height);
+        ctxBack.drawImage(imgBack, 0, 0);
+
+        // 번호 출력 (예시 좌표: 하단 혹은 중앙 세로)
+        ctxBack.fillStyle = 'rgba(120, 20, 20, 0.85)'; // 일련번호나 낙인 느낌의 붉은 계열 톤
+        ctxBack.textAlign = 'center';
+        ctxBack.font = 'bold 28px monospace';
+        
+        let numText = fields.number.value;
+        if(!numText) {
+            // 비어있을 경우 자동 생성 예시
+            numText = "虎-017"; 
+        }
+        ctxBack.fillText(numText, backCanvas.width / 2, backCanvas.height * 0.85);
+    }
+
+    // --- 4. 이벤트 리스너 등록 (실시간 반영) ---
+    Object.values(fields).forEach(field => {
+        field.addEventListener('input', render);
+    });
+
+    // --- 5. 최종 이미지 발급 (다운로드) 기능 ---
+    saveBtn.addEventListener('click', () => {
+        // 앞면 다운로드 링크 활성화
+        const linkFront = document.createElement('a');
+        linkFront.download = `${fields.name.value || '목패'}_앞면.jpg`;
+        linkFront.href = frontCanvas.toDataURL('image/jpeg', 0.9);
+        linkFront.click();
+
+        // 약간의 시차를 두고 뒷면도 함께 다운로드
+        setTimeout(() => {
+            const linkBack = document.createElement('a');
+            linkBack.download = `${fields.name.value || '목패'}_뒷면.jpg`;
+            linkBack.href = backCanvas.toDataURL('image/jpeg', 0.9);
+            linkBack.click();
+        }, 300);
+    });
+</script>
+
+</body>
+</html>
