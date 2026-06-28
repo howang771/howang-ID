@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub ID 발급소</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d0a08;
+            color: #d4a773;
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1200px;
+            height: 750px;
+            display: flex;
+            background: #0d0a08;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            border: 1px solid #33281d;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        /* 왼쪽 정보 입력 창 */
+        .input-panel {
+            width: 320px;
+            padding: 40px;
+            background: rgba(20, 16, 13, 0.6);
+            border-right: 1px solid rgba(51, 40, 29, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo-main {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .github-icon-main {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 15px;
+            fill: #d4a773;
+        }
+
+        .logo-main h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            letter-spacing: 1px;
+        }
+        .logo-main p {
+            font-size: 11px;
+            color: #8a735c;
+            margin: 5px 0 0 0;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        .form-title {
+            font-size: 14px;
+            color: #e0be97;
+            margin-bottom: 20px;
+            text-align: left;
+            width: 100%;
+            border-bottom: 1px solid #33281d;
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #8a735c;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #423425;
+            color: #d4a773;
+            font-size: 12px;
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #8a735c;
+        }
+        .form-group input::placeholder {
+            color: #5d4f40;
+        }
+
+        .btn-issue {
+            width: 100%;
+            padding: 14px 0;
+            background: linear-gradient(180deg, #4a3525 0%, #291f16 100%);
+            border: 1px solid #735d46;
+            color: #e0be97;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: auto;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            transition: background 0.2s;
+        }
+        .btn-issue:hover {
+            background: linear-gradient(180deg, #5c432f 0%, #33271c 100%);
+        }
+
+        .notice-list {
+            margin-top: 20px;
+            font-size: 10px;
+            color: #6d5d4d;
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            line-height: 1.5;
+        }
+        .notice-list li.notice-title {
+            color: #8a735c;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        /* 오른쪽 목패 프리뷰 영역 */
+        .preview-panel {
+            flex-grow: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at 50% 50%, #171310 0%, #0d0a08 100%);
+            box-sizing: border-box;
+        }
+
+        .preview-header {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .preview-header h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #e0be97;
+        }
+        .preview-header p {
+            font-size: 11px;
+            color: #8a735c;
+            margin: 4px 0 0 0;
+        }
+
+        .preview-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tag-label {
+            font-size: 11px;
+            color: #8a735c;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* 목패 이미지 래퍼 및 마스크 */
+        .tag-card-wrapper {
+            width: 250px;
+            height: 480px;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border: 1px solid #291f16;
+            position: relative;
+            background: #14100d;
+        }
+
+        /* IMG_2887 이미지가 꽉 차게 들어가는 스타일 */
+        .tag-card-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 하단 컨트롤 */
+        .controls {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-control {
+            padding: 8px 16px;
+            background: #1a1511;
+            border: 1px solid #423425;
+            color: #8a735c;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .btn-control:hover {
+            border-color: #735d46;
+            color: #d4a773;
+            background: #291f16;
+        }
+
+        .btn-control svg {
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
+            fill: currentColor;
+        }
+
+        .copyright {
+            font-size: 10px;
+            color: #5d4f40;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="input-panel">
+        <div class="logo-main">
+            <svg class="github-icon-main" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            <h1>GitHub ID 발급소</h1>
+            <p>호왕의 어명과 기트허브의 이름으로 신분을 증명할 목패를 발급합니다.</p>
+        </div>
+
+        <div class="form-title">정보 입력</div>
+
+        <div class="form-group">
+            <label>이름</label>
+            <input type="text" placeholder="이름을 입력하세요.">
+        </div>
+
+        <div class="form-group">
+            <label>종족 (직접 입력)</label>
+            <input type="text" placeholder="본인의 종족을 입력하세요.">
+        </div>
+
+        <div class="form-group">
+            <label>신분(직업)</label>
+            <input type="text" placeholder="신분을 입력하세요.">
+        </div>
+
+        <div class="form-group">
+            <label>재주</label>
+            <input type="text" placeholder="재주를 입력하세요.">
+        </div>
+
+        <div class="form-group">
+            <label>번호</label>
+            <input type="text" placeholder="번호를 입력하세요. (예: 虎-017)">
+            <p style="font-size: 10px; color: #5d4f40; margin: 4px 0 0 0;">비워두면 자동으로 생성됩니다.</p>
+        </div>
+
+        <button class="btn-issue">목패 발급하기</button>
+
+        <ul class="notice-list">
+            <li class="notice-title">* 유의사항</li>
+            <li>기트허브에서 발급된 디지털 신분증은 공식 증명으로 사용 가능하나 위조를 금합니다.</li>
+        </ul>
+    </div>
+
+    <div class="preview-panel">
+        <div class="preview-header">
+            <h2>신분증 프리뷰</h2>
+            <p>정보가 목패에 반영됩니다.</p>
+        </div>
+
+        <div class="preview-content">
+            <div class="tag-container">
+                <div class="tag-label">✦ 앞면 ✦</div>
+                <div class="tag-card-wrapper">
+                    <img src="IMG_2887.png" alt="목패 앞면">
+                </div>
+            </div>
+
+            <div class="tag-container">
+                <div class="tag-label">✦ 뒷면 ✦</div>
+                <div class="tag-card-wrapper">
+                    <img src="IMG_2887.png" alt="목패 뒷면">
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="copyright">
+                © 虎王宴 GitHub · All rights reserved.
+            </div>
+            <div class="btn-group">
+                <button class="btn-control">
+                    <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                    PNG로 저장
+                </button>
+                <button class="btn-control">
+                    <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    새로 발급하기
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
